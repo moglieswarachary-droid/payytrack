@@ -3,7 +3,7 @@ import * as mockStore from './mockStore';
 
 const API = axios.create({
   baseURL: '/api',
-  timeout: 5000,
+  timeout: 4000,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -18,17 +18,28 @@ API.interceptors.request.use(config => {
   return config;
 }, error => Promise.reject(error));
 
-// Helper wrapper that attempts API call, falling back to mockStore if unavailable
+// Check if running on localhost with a dev server vs hosted static platform (e.g. Vercel)
+const isHostedStatic = typeof window !== 'undefined' && 
+  window.location.hostname !== 'localhost' && 
+  window.location.hostname !== '127.0.0.1';
+
+// Helper wrapper that attempts API call, falling back immediately on static hosts or on error
 async function safeCall(apiPromise, mockFallback) {
+  // If deployed to a static host (Vercel) where Express backend is not running, use local store directly
+  if (isHostedStatic) {
+    const mockData = await mockFallback();
+    return { data: mockData };
+  }
+
   try {
     const res = await apiPromise();
-    // Validate response is JSON and not an HTML SPA fallback page
-    if (res.data && typeof res.data === 'object') {
+    // Validate response is JSON and not an HTML fallback page
+    if (res && res.data && typeof res.data === 'object') {
       return res;
     }
     throw new Error('Non-JSON response from API');
   } catch (err) {
-    // Graceful fallback to mock store
+    // Graceful fallback to mock store for offline/demo reliability
     const mockData = await mockFallback();
     return { data: mockData };
   }
@@ -72,7 +83,15 @@ export const fetchICICIPaymentsApi = async () => {
   );
 };
 
-export const fetchICICIPaymentByIdApi = (id) => API.get(`/icici/payments/${id}`);
+export const fetchICICIPaymentByIdApi = async (id) => {
+  return safeCall(
+    () => API.get(`/icici/payments/${id}`),
+    () => {
+      const list = mockStore.mockGetICICIPayments();
+      return list.find(r => r.id === id) || null;
+    }
+  );
+};
 
 export const saveICICIPaymentApi = async (data) => {
   return safeCall(
@@ -88,7 +107,18 @@ export const deleteICICIPaymentApi = async (id) => {
   );
 };
 
-export const duplicateICICIPaymentApi = (id) => API.post(`/icici/payments/${id}/duplicate`);
+export const duplicateICICIPaymentApi = async (id) => {
+  return safeCall(
+    () => API.post(`/icici/payments/${id}/duplicate`),
+    () => {
+      const list = mockStore.mockGetICICIPayments();
+      const item = list.find(r => r.id === id);
+      if (!item) return null;
+      const dup = { ...item, id: `icici_pay_${Date.now()}` };
+      return mockStore.mockSaveICICIPayment(dup);
+    }
+  );
+};
 
 // Slice Payments APIs
 export const fetchSlicePaymentsApi = async () => {
@@ -98,7 +128,15 @@ export const fetchSlicePaymentsApi = async () => {
   );
 };
 
-export const fetchSlicePaymentByIdApi = (id) => API.get(`/slice/payments/${id}`);
+export const fetchSlicePaymentByIdApi = async (id) => {
+  return safeCall(
+    () => API.get(`/slice/payments/${id}`),
+    () => {
+      const list = mockStore.mockGetSlicePayments();
+      return list.find(r => r.id === id) || null;
+    }
+  );
+};
 
 export const saveSlicePaymentApi = async (data) => {
   return safeCall(
@@ -114,7 +152,18 @@ export const deleteSlicePaymentApi = async (id) => {
   );
 };
 
-export const duplicateSlicePaymentApi = (id) => API.post(`/slice/payments/${id}/duplicate`);
+export const duplicateSlicePaymentApi = async (id) => {
+  return safeCall(
+    () => API.post(`/slice/payments/${id}/duplicate`),
+    () => {
+      const list = mockStore.mockGetSlicePayments();
+      const item = list.find(r => r.id === id);
+      if (!item) return null;
+      const dup = { ...item, id: `slice_pay_${Date.now()}` };
+      return mockStore.mockSaveSlicePayment(dup);
+    }
+  );
+};
 
 // Analytics & Reports
 export const fetchAnalyticsApi = async () => {
@@ -124,7 +173,16 @@ export const fetchAnalyticsApi = async () => {
   );
 };
 
-export const fetchReportsApi = (params) => API.get('/reports', { params });
+export const fetchReportsApi = async (params) => {
+  return safeCall(
+    () => API.get('/reports', { params }),
+    () => {
+      const icici = mockStore.mockGetICICIPayments();
+      const slice = mockStore.mockGetSlicePayments();
+      return { icici, slice };
+    }
+  );
+};
 
 // Settings & Audit
 export const fetchSettingsApi = async () => {
@@ -134,7 +192,12 @@ export const fetchSettingsApi = async () => {
   );
 };
 
-export const updateSettingsApi = (data) => API.put('/settings', data);
+export const updateSettingsApi = async (data) => {
+  return safeCall(
+    () => API.put('/settings', data),
+    () => data
+  );
+};
 
 export const resetDemoDataApi = async () => {
   return safeCall(
@@ -143,7 +206,29 @@ export const resetDemoDataApi = async () => {
   );
 };
 
-export const clearAllDataApi = () => API.post('/settings/clear-all');
-export const fetchAuditLogsApi = () => API.get('/audit');
+export const clearAllDataApi = async () => {
+  return safeCall(
+    () => API.post('/settings/clear-all'),
+    () => {
+      localStorage.removeItem('paytrack_icici');
+      localStorage.removeItem('paytrack_slice');
+      return { success: true };
+    }
+  );
+};
+
+export const fetchAuditLogsApi = async () => {
+  return safeCall(
+    () => API.get('/audit'),
+    () => [
+      {
+        id: 'log_001',
+        action: 'SYSTEM_INIT',
+        details: 'PayTrack workspace active with demo records.',
+        timestamp: new Date().toISOString()
+      }
+    ]
+  );
+};
 
 export default API;
