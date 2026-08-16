@@ -18,8 +18,6 @@ import SettingsPage  from './pages/SettingsPage';
 import GoalsPage     from './pages/GoalsPage';
 import SimulatorPage from './pages/SimulatorPage';
 import HealthPage    from './pages/HealthPage';
-import LoginPage     from './pages/LoginPage';
-
 import { deleteICICIPaymentApi, deleteSlicePaymentApi } from './services/api';
 import { LoadingSpinner } from './components/RedlineComponents';
 
@@ -73,8 +71,6 @@ function MainApp() {
       </div>
     );
   }
-
-  if (!user) return <LoginPage />;
 
   const handleOpenAddModal = (account = 'icici') => {
     setEditRecordData(null);

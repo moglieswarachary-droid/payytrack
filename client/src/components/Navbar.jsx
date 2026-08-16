@@ -100,9 +100,9 @@ export default function Navbar({ activeTab, onOpenSearch, onOpenAddModal, privac
                   </button>
                   <button
                     onClick={() => { setShowUserMenu(false); logout(); }}
-                    className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-[#FFF6F6] rounded-lg"
+                    className="w-full text-left px-3 py-2 text-sm text-[#C62828] hover:bg-[#FFF6F6] rounded-lg"
                   >
-                    Sign out
+                    Reset demo data
                   </button>
                 </div>
               </div>

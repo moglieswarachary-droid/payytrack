@@ -1,87 +1,54 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import * as authLib from '../lib/auth';
+import { initMockStore, mockResetDemo } from '../services/mockStore';
 
 const AuthContext = createContext();
 
+const DEFAULT_USER = {
+  id: 'demo-user',
+  name: 'Rohan Sharma',
+  email: 'demo@paytrack.app',
+  role: 'user',
+  isDemo: true
+};
+
 export function AuthProvider({ children }) {
-  const [authState, setAuthState] = useState(() => {
-    return authLib.initializeAuth();
-  });
+  // Always active, no login barriers
+  const [user, setUser] = useState(DEFAULT_USER);
+  const [token] = useState('paytrack_active_session');
 
-  const [loading, setLoading] = useState(false);
-
-  // Sync session on mount
   useEffect(() => {
-    const session = authLib.initializeAuth();
-    if (session.isAuthenticated && session.currentUser) {
-      setAuthState(session);
-    }
+    initMockStore();
+    localStorage.setItem('fintech_token', 'paytrack_active_session');
+    localStorage.setItem('paytrack_user', JSON.stringify(DEFAULT_USER));
   }, []);
 
-  const loginAsDemo = () => {
-    setLoading(true);
-    try {
-      const session = authLib.loginAsDemo();
-      setAuthState(session);
-      return session.currentUser;
-    } catch (err) {
-      console.error('Failed to log in as demo:', err);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+  const login = async () => DEFAULT_USER;
+  const loginAsDemo = () => DEFAULT_USER;
+  const demoLogin = () => DEFAULT_USER;
+  const register = async () => DEFAULT_USER;
 
-  const login = async (email, password) => {
-    setLoading(true);
-    try {
-      const session = await authLib.login(email, password);
-      setAuthState(session);
-      return session.currentUser;
-    } catch (err) {
-      console.error('Failed to log in:', err);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const register = async (name, email, password) => {
-    setLoading(true);
-    try {
-      const session = await authLib.register(name, email, password);
-      setAuthState(session);
-      return session.currentUser;
-    } catch (err) {
-      console.error('Failed to register:', err);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
+  const resetData = () => {
+    mockResetDemo();
+    window.location.reload();
   };
 
   const logout = () => {
-    authLib.logout();
-    setAuthState({
-      currentUser: null,
-      isAuthenticated: false,
-      authMode: null,
-      token: null
-    });
+    resetData();
   };
 
   const value = {
-    user: authState.currentUser,
-    currentUser: authState.currentUser,
-    isAuthenticated: authState.isAuthenticated,
-    authMode: authState.authMode,
-    token: authState.token,
-    loading,
+    user,
+    currentUser: user,
+    isAuthenticated: true,
+    authMode: 'direct',
+    token,
+    loading: false,
     login,
     loginAsDemo,
-    demoLogin: loginAsDemo, // alias for backwards compatibility
+    demoLogin,
     register,
-    logout
+    logout,
+    resetData
   };
 
   return (

@@ -152,13 +152,13 @@ export default function SettingsPage({ privacyMode, onPrivacyToggle }) {
         />
       </RedlineCard>
 
-      {/* Logout */}
+      {/* Reset Data */}
       <button
         onClick={logout}
         className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-[#EAEAEA] text-sm font-medium text-[#C62828] hover:bg-[#FFF6F6] hover:border-[#FDECEC] transition-colors"
       >
-        <LogOut size={15} />
-        Sign out
+        <Trash2 size={15} />
+        Reset workspace data
       </button>
     </div>
   );
