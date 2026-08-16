@@ -1,0 +1,36 @@
+{
+  "name": "PayTrack — Personal Credit Manager",
+  "short_name": "PayTrack",
+  "description": "Track ICICI and Slice credit payments. Know what you owe, what you paid, and what's due next.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FAFAFA",
+  "theme_color": "#C62828",
+  "lang": "en-IN",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23C62828'/%3E%3Cpath d='M48 44h56a36 36 0 0 1 0 72H48zm0 72h36l44 56H90z' fill='white'/%3E%3Cpath d='M40 168 L152 168' stroke='white' stroke-width='12' stroke-linecap='round'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%23C62828'/%3E%3Cpath d='M128 120h148a96 96 0 0 1 0 192H128zm0 192h96l116 148H236z' fill='white'/%3E%3Cpath d='M108 444 L404 444' stroke='white' stroke-width='28' stroke-linecap='round'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Payment",
+      "short_name": "Add",
+      "description": "Record a new payment",
+      "url": "/?action=add",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ],
+  "categories": ["finance", "productivity"]
+}

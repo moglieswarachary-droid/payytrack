@@ -1,0 +1,209 @@
+{
+  "users": [
+    {
+      "id": "usr_demo_001",
+      "name": "Rohan Sharma",
+      "email": "demo@fintech.local",
+      "password_hash": "$2a$10$telpRAN7WEE8CVeCui32VOFspkhM8q8OMbOfsXcXRX1B5oyZurGnm",
+      "created_at": "2026-08-16T04:59:48.895Z"
+    }
+  ],
+  "credit_cards": [
+    {
+      "id": "crd_icici_001",
+      "user_id": "usr_demo_001",
+      "provider": "ICICI Bank",
+      "card_name": "ICICI Bank Sapphiro Credit Card",
+      "last_4": "1234",
+      "credit_limit": 150000,
+      "created_at": "2026-08-16T04:59:48.895Z"
+    }
+  ],
+  "slice_accounts": [
+    {
+      "id": "slc_acc_001",
+      "user_id": "usr_demo_001",
+      "account_name": "Slice Borrow Account",
+      "created_at": "2026-08-16T04:59:48.895Z"
+    }
+  ],
+  "user_settings": [
+    {
+      "user_id": "usr_demo_001",
+      "theme": "dark",
+      "currency": "INR",
+      "currency_symbol": "₹",
+      "alert_util_healthy": 30,
+      "alert_util_moderate": 50,
+      "alert_util_high": 75,
+      "payment_reminders": true,
+      "due_date_alerts": true,
+      "demo_mode": true,
+      "updated_at": "2026-08-16T04:59:48.895Z"
+    }
+  ],
+  "icici_payments": [
+    {
+      "id": "icici_pay_101",
+      "user_id": "usr_demo_001",
+      "card_id": "crd_icici_001",
+      "billing_month": "2026-05",
+      "outstanding": 38000,
+      "amount_paid": 38000,
+      "credit_limit_at_payment": 120000,
+      "available_limit_after_payment": 120000,
+      "credit_limit_next_bill": 120000,
+      "payment_date": "2026-05-18",
+      "due_date": "2026-05-20",
+      "status": "Paid",
+      "notes": "Full payment made via UPI.",
+      "created_at": "2026-05-18T10:00:00.000Z",
+      "updated_at": "2026-05-18T10:00:00.000Z"
+    },
+    {
+      "id": "icici_pay_102",
+      "user_id": "usr_demo_001",
+      "card_id": "crd_icici_001",
+      "billing_month": "2026-06",
+      "outstanding": 42500,
+      "amount_paid": 42500,
+      "credit_limit_at_payment": 120000,
+      "available_limit_after_payment": 120000,
+      "credit_limit_next_bill": 150000,
+      "payment_date": "2026-06-16",
+      "due_date": "2026-06-20",
+      "status": "Paid",
+      "notes": "Requested limit enhancement from ICICI app.",
+      "created_at": "2026-06-16T11:00:00.000Z",
+      "updated_at": "2026-06-16T11:00:00.000Z"
+    },
+    {
+      "id": "icici_pay_103",
+      "user_id": "usr_demo_001",
+      "card_id": "crd_icici_001",
+      "billing_month": "2026-07",
+      "outstanding": 65000,
+      "amount_paid": 45000,
+      "credit_limit_at_payment": 150000,
+      "available_limit_after_payment": 130000,
+      "credit_limit_next_bill": 150000,
+      "payment_date": "2026-07-17",
+      "due_date": "2026-07-20",
+      "status": "Partially Paid",
+      "notes": "Partial payment made due to gadget purchase.",
+      "created_at": "2026-07-17T14:30:00.000Z",
+      "updated_at": "2026-07-17T14:30:00.000Z"
+    },
+    {
+      "id": "icici_pay_104",
+      "user_id": "usr_demo_001",
+      "card_id": "crd_icici_001",
+      "billing_month": "2026-08",
+      "outstanding": 54500,
+      "amount_paid": 30000,
+      "credit_limit_at_payment": 150000,
+      "available_limit_after_payment": 125500,
+      "credit_limit_next_bill": 150000,
+      "payment_date": "2026-08-15",
+      "due_date": "2026-08-25",
+      "status": "Partially Paid",
+      "notes": "Current active billing cycle.",
+      "created_at": "2026-08-15T09:15:00.000Z",
+      "updated_at": "2026-08-15T09:15:00.000Z"
+    },
+    {
+      "id": "icici_pay_1786858997048",
+      "user_id": "usr_demo_001",
+      "card_id": "crd_icici_001",
+      "billing_month": "2026-08",
+      "outstanding": 900000,
+      "amount_paid": 988,
+      "credit_limit_at_payment": 150000,
+      "available_limit_after_payment": 0,
+      "credit_limit_next_bill": 150000,
+      "payment_date": "2026-08-16",
+      "due_date": "2026-08-31",
+      "status": "Pending",
+      "notes": "",
+      "created_at": "2026-08-16T05:43:17.048Z",
+      "updated_at": "2026-08-16T05:43:17.048Z"
+    }
+  ],
+  "slice_payments": [
+    {
+      "id": "slice_pay_101",
+      "user_id": "usr_demo_001",
+      "account_id": "slc_acc_001",
+      "billing_month": "2026-05",
+      "opening_outstanding": 25000,
+      "repayment_paid": 10000,
+      "payment_date": "2026-05-12",
+      "due_date": "2026-05-15",
+      "status": "Paid",
+      "notes": "Monthly Slice 3-part installment 1.",
+      "created_at": "2026-05-12T08:00:00.000Z",
+      "updated_at": "2026-05-12T08:00:00.000Z"
+    },
+    {
+      "id": "slice_pay_102",
+      "user_id": "usr_demo_001",
+      "account_id": "slc_acc_001",
+      "billing_month": "2026-06",
+      "opening_outstanding": 15000,
+      "repayment_paid": 10000,
+      "payment_date": "2026-06-14",
+      "due_date": "2026-06-15",
+      "status": "Paid",
+      "notes": "Monthly Slice installment 2.",
+      "created_at": "2026-06-14T10:00:00.000Z",
+      "updated_at": "2026-06-14T10:00:00.000Z"
+    },
+    {
+      "id": "slice_pay_103",
+      "user_id": "usr_demo_001",
+      "account_id": "slc_acc_001",
+      "billing_month": "2026-07",
+      "opening_outstanding": 18000,
+      "repayment_paid": 6000,
+      "payment_date": "2026-07-14",
+      "due_date": "2026-07-15",
+      "status": "Paid",
+      "notes": "Refreshed borrow power.",
+      "created_at": "2026-07-14T11:20:00.000Z",
+      "updated_at": "2026-07-14T11:20:00.000Z"
+    },
+    {
+      "id": "slice_pay_104",
+      "user_id": "usr_demo_001",
+      "account_id": "slc_acc_001",
+      "billing_month": "2026-08",
+      "opening_outstanding": 12000,
+      "repayment_paid": 4000,
+      "payment_date": "2026-08-10",
+      "due_date": "2026-08-18",
+      "status": "Partially Paid",
+      "notes": "Remaining installment due soon.",
+      "created_at": "2026-08-10T16:45:00.000Z",
+      "updated_at": "2026-08-10T16:45:00.000Z"
+    }
+  ],
+  "audit_logs": [
+    {
+      "id": "log_001",
+      "user_id": "usr_demo_001",
+      "action": "SYSTEM_INIT",
+      "record_id": "SYSTEM",
+      "details": "Initialized FinTech Payment Tracker with seed records.",
+      "timestamp": "2026-08-16T04:59:48.895Z"
+    },
+    {
+      "id": "log_1786858997048",
+      "user_id": "usr_demo_001",
+      "action": "CREATE_ICICI_PAYMENT",
+      "record_id": "icici_pay_1786858997048",
+      "details": "Saved ICICI payment for 2026-08 (Outstanding: ₹900000, Paid: ₹988)",
+      "timestamp": "2026-08-16T05:43:17.048Z"
+    }
+  ],
+  "monthly_snapshots": []
+}
