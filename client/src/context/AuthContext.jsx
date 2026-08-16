@@ -1,107 +1,100 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { loginApi, registerApi, fetchMeApi } from '../services/api';
-import { initMockStore } from '../services/mockStore';
+import * as authLib from '../lib/auth';
 
 const AuthContext = createContext();
 
-const DEFAULT_DEMO_USER = {
-  id: 'usr_demo_001',
-  name: 'Rohan Sharma',
-  email: 'demo@fintech.local'
-};
-
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    // Check if previously logged in
-    try {
-      const savedUser = localStorage.getItem('paytrack_user');
-      if (savedUser) return JSON.parse(savedUser);
-      if (localStorage.getItem('fintech_token')) return DEFAULT_DEMO_USER;
-    } catch {
-      return null;
-    }
-    return null;
+  const [authState, setAuthState] = useState(() => {
+    return authLib.initializeAuth();
   });
 
-  const [token, setToken] = useState(() => localStorage.getItem('fintech_token') || null);
   const [loading, setLoading] = useState(false);
 
+  // Sync session on mount
   useEffect(() => {
-    initMockStore();
+    const session = authLib.initializeAuth();
+    if (session.isAuthenticated && session.currentUser) {
+      setAuthState(session);
+    }
   }, []);
 
-  // Instant demo login with zero authentication barriers
-  const demoLogin = () => {
-    initMockStore();
-    const tokenVal = `paytrack_demo_token_${Date.now()}`;
-    localStorage.setItem('fintech_token', tokenVal);
-    localStorage.setItem('paytrack_user', JSON.stringify(DEFAULT_DEMO_USER));
-    setToken(tokenVal);
-    setUser(DEFAULT_DEMO_USER);
-    return DEFAULT_DEMO_USER;
+  const loginAsDemo = () => {
+    setLoading(true);
+    try {
+      const session = authLib.loginAsDemo();
+      setAuthState(session);
+      return session.currentUser;
+    } catch (err) {
+      console.error('Failed to log in as demo:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const login = async (email, password) => {
-    // If demo credentials or requested, immediately log in
-    if (!email || email.toLowerCase() === 'demo@fintech.local') {
-      return demoLogin();
-    }
-
+    setLoading(true);
     try {
-      const res = await loginApi({ email, password });
-      const userData = res?.data?.user || {
-        id: `usr_${Date.now()}`,
-        name: email.split('@')[0] || 'User',
-        email
-      };
-      const tokenVal = res?.data?.token || `paytrack_token_${Date.now()}`;
-      localStorage.setItem('fintech_token', tokenVal);
-      localStorage.setItem('paytrack_user', JSON.stringify(userData));
-      setToken(tokenVal);
-      setUser(userData);
-      return userData;
-    } catch {
-      // Fallback: immediate local login
-      const userData = {
-        id: `usr_${Date.now()}`,
-        name: email.split('@')[0] || 'User',
-        email
-      };
-      const tokenVal = `paytrack_token_${Date.now()}`;
-      localStorage.setItem('fintech_token', tokenVal);
-      localStorage.setItem('paytrack_user', JSON.stringify(userData));
-      setToken(tokenVal);
-      setUser(userData);
-      return userData;
+      const session = await authLib.login(email, password);
+      setAuthState(session);
+      return session.currentUser;
+    } catch (err) {
+      console.error('Failed to log in:', err);
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
   const register = async (name, email, password) => {
-    const userData = {
-      id: `usr_${Date.now()}`,
-      name: name || 'User',
-      email: email || 'user@example.com'
-    };
-    const tokenVal = `paytrack_token_${Date.now()}`;
-    localStorage.setItem('fintech_token', tokenVal);
-    localStorage.setItem('paytrack_user', JSON.stringify(userData));
-    setToken(tokenVal);
-    setUser(userData);
-    return userData;
+    setLoading(true);
+    try {
+      const session = await authLib.register(name, email, password);
+      setAuthState(session);
+      return session.currentUser;
+    } catch (err) {
+      console.error('Failed to register:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem('fintech_token');
-    localStorage.removeItem('paytrack_user');
-    setToken(null);
-    setUser(null);
+    authLib.logout();
+    setAuthState({
+      currentUser: null,
+      isAuthenticated: false,
+      authMode: null,
+      token: null
+    });
+  };
+
+  const value = {
+    user: authState.currentUser,
+    currentUser: authState.currentUser,
+    isAuthenticated: authState.isAuthenticated,
+    authMode: authState.authMode,
+    token: authState.token,
+    loading,
+    login,
+    loginAsDemo,
+    demoLogin: loginAsDemo, // alias for backwards compatibility
+    register,
+    logout
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, demoLogin, register, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

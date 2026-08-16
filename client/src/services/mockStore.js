@@ -2,9 +2,11 @@
 
 const SEED_DATA = {
   user: {
-    id: 'usr_demo_001',
-    name: 'Rohan Sharma',
-    email: 'demo@fintech.local'
+    id: 'demo-user',
+    name: 'Demo User (Rohan Sharma)',
+    email: 'demo@paytrack.app',
+    role: 'user',
+    isDemo: true
   },
   icici: [
     {

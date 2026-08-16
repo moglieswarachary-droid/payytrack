@@ -38,7 +38,7 @@ function RedlineSVGStory() {
 }
 
 export default function LoginPage() {
-  const { login, demoLogin, register } = useAuth();
+  const { login, loginAsDemo, register } = useAuth();
 
   const [isRegister, setIsRegister] = useState(false);
   const [name, setName]         = useState('');
@@ -58,17 +58,23 @@ export default function LoginPage() {
       } else {
         await login(email, password);
       }
-    } catch {
-      // Instant fallback to demo login on any issue
-      demoLogin();
+    } catch (err) {
+      console.error('Authentication error:', err);
+      setError(err?.response?.data?.error || err?.message || 'Unable to sign in. Please check your credentials.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDemoLogin = () => {
+  const handleDemoLogin = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
     setError(null);
-    demoLogin();
+    try {
+      loginAsDemo();
+    } catch (err) {
+      console.error('Demo login error:', err);
+      setError('Unable to start demo session. Please try again.');
+    }
   };
 
   return (
@@ -136,7 +142,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Error */}
+          {/* Error alert */}
           {error && (
             <div className="flex items-center gap-2.5 p-3.5 mb-5 rounded-xl bg-[#FFF6F6] border border-[#FDECEC] text-[#8E1B1B] text-sm">
               <AlertCircle size={16} className="shrink-0" />
@@ -224,11 +230,12 @@ export default function LoginPage() {
             <hr className="flex-1 border-[#EAEAEA]" />
           </div>
 
-          {/* Demo login */}
+          {/* Demo login button — isolated completely from form validation */}
           <button
+            type="button"
             onClick={handleDemoLogin}
             disabled={loading}
-            className="rl-btn-secondary w-full py-3 text-sm"
+            className="rl-btn-secondary w-full py-3 text-sm flex items-center justify-center gap-2"
           >
             <CheckCircle2 size={15} className="text-[#C62828]" />
             Try with demo account
@@ -238,6 +245,7 @@ export default function LoginPage() {
           <p className="text-center text-sm text-[#666] mt-6">
             {isRegister ? 'Already have an account? ' : "Don't have an account? "}
             <button
+              type="button"
               onClick={() => { setIsRegister(!isRegister); setError(null); }}
               className="text-[#C62828] font-semibold hover:underline"
             >
