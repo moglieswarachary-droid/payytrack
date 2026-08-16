@@ -26,3 +26,5 @@ Thumbs.db
 # Temp / Cache
 .npm/
 .eslintcache
+.vite/
+client/.vite/
