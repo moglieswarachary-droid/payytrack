@@ -25,7 +25,6 @@ const isHostedStatic = typeof window !== 'undefined' &&
 
 // Helper wrapper that attempts API call, falling back immediately on static hosts or on error
 async function safeCall(apiPromise, mockFallback) {
-  // If deployed to a static host (Vercel) where Express backend is not running, use local store directly
   if (isHostedStatic) {
     const mockData = await mockFallback();
     return { data: mockData };
@@ -33,19 +32,17 @@ async function safeCall(apiPromise, mockFallback) {
 
   try {
     const res = await apiPromise();
-    // Validate response is JSON and not an HTML fallback page
     if (res && res.data && typeof res.data === 'object') {
       return res;
     }
     throw new Error('Non-JSON response from API');
   } catch (err) {
-    // Graceful fallback to mock store for offline/demo reliability
     const mockData = await mockFallback();
     return { data: mockData };
   }
 }
 
-// Auth APIs
+// ── AUTH APIs ──
 export const loginApi = async (credentials) => {
   return safeCall(
     () => API.post('/auth/login', credentials),
@@ -67,7 +64,7 @@ export const fetchMeApi = async () => {
   );
 };
 
-// Dashboard API
+// ── DASHBOARD & ANALYTICS APIs ──
 export const fetchDashboardApi = async () => {
   return safeCall(
     () => API.get('/dashboard'),
@@ -75,21 +72,108 @@ export const fetchDashboardApi = async () => {
   );
 };
 
-// ICICI Payments APIs
+export const fetchAnalyticsApi = async () => {
+  return safeCall(
+    () => API.get('/analytics'),
+    () => {
+      const dash = mockStore.mockGetDashboard();
+      return {
+        trends: dash.trends || [],
+        metrics: dash.metrics || {},
+        icici: dash.icici || [],
+        slice: dash.slice || []
+      };
+    }
+  );
+};
+
+// ── CUSTOMERS APIs ──
+export const fetchCustomersApi = async (filter = {}) => {
+  return safeCall(
+    () => API.get('/customers', { params: filter }),
+    () => mockStore.mockGetCustomers(filter)
+  );
+};
+
+export const fetchCustomerByIdApi = async (id) => {
+  return safeCall(
+    () => API.get(`/customers/${id}`),
+    () => mockStore.mockGetCustomerById(id)
+  );
+};
+
+export const saveCustomerApi = async (data) => {
+  return safeCall(
+    () => (data.id ? API.put(`/customers/${data.id}`, data) : API.post('/customers', data)),
+    () => mockStore.mockSaveCustomer(data)
+  );
+};
+
+export const deleteCustomerApi = async (id) => {
+  return safeCall(
+    () => API.delete(`/customers/${id}`),
+    () => mockStore.mockDeleteCustomer(id)
+  );
+};
+
+// ── CREDITS APIs ──
+export const fetchCreditsApi = async (filter = {}) => {
+  return safeCall(
+    () => API.get('/credits', { params: filter }),
+    () => mockStore.mockGetCredits(filter)
+  );
+};
+
+export const saveCreditApi = async (data) => {
+  return safeCall(
+    () => (data.id ? API.put(`/credits/${data.id}`, data) : API.post('/credits', data)),
+    () => mockStore.mockSaveCredit(data)
+  );
+};
+
+// ── PAYMENTS & TRANSACTIONS APIs ──
+export const fetchTransactionsApi = async (filter = {}) => {
+  return safeCall(
+    () => API.get('/payments/transactions', { params: filter }),
+    () => mockStore.mockGetTransactions(filter)
+  );
+};
+
+export const recordPaymentApi = async (data) => {
+  return safeCall(
+    () => API.post('/payments/record', data),
+    () => mockStore.mockRecordPayment(data)
+  );
+};
+
+export const voidTransactionApi = async (id, reason) => {
+  return safeCall(
+    () => API.post(`/payments/void/${id}`, { reason }),
+    () => mockStore.mockVoidTransaction(id, reason)
+  );
+};
+
+// ── STATEMENT API ──
+export const fetchCustomerStatementApi = async (customerId, fromDate, toDate) => {
+  return safeCall(
+    () => API.get(`/statements/${customerId}`, { params: { fromDate, toDate } }),
+    () => mockStore.mockGetCustomerStatement(customerId, fromDate, toDate)
+  );
+};
+
+// ── AUDIT LOGS API ──
+export const fetchAuditLogsApi = async () => {
+  return safeCall(
+    () => API.get('/audit'),
+    () => mockStore.mockGetAuditLogs()
+  );
+};
+
+// ── ICICI PAYMENTS (PRESERVED) ──
 export const fetchICICIPaymentsApi = async () => {
   return safeCall(
     () => API.get('/icici/payments'),
     () => mockStore.mockGetICICIPayments()
-  );
-};
-
-export const fetchICICIPaymentByIdApi = async (id) => {
-  return safeCall(
-    () => API.get(`/icici/payments/${id}`),
-    () => {
-      const list = mockStore.mockGetICICIPayments();
-      return list.find(r => r.id === id) || null;
-    }
   );
 };
 
@@ -114,27 +198,17 @@ export const duplicateICICIPaymentApi = async (id) => {
       const list = mockStore.mockGetICICIPayments();
       const item = list.find(r => r.id === id);
       if (!item) return null;
-      const dup = { ...item, id: `icici_pay_${Date.now()}` };
+      const dup = { ...item, id: undefined, billing_month: new Date().toISOString().slice(0, 7) };
       return mockStore.mockSaveICICIPayment(dup);
     }
   );
 };
 
-// Slice Payments APIs
+// ── SLICE PAYMENTS (PRESERVED) ──
 export const fetchSlicePaymentsApi = async () => {
   return safeCall(
     () => API.get('/slice/payments'),
     () => mockStore.mockGetSlicePayments()
-  );
-};
-
-export const fetchSlicePaymentByIdApi = async (id) => {
-  return safeCall(
-    () => API.get(`/slice/payments/${id}`),
-    () => {
-      const list = mockStore.mockGetSlicePayments();
-      return list.find(r => r.id === id) || null;
-    }
   );
 };
 
@@ -159,76 +233,8 @@ export const duplicateSlicePaymentApi = async (id) => {
       const list = mockStore.mockGetSlicePayments();
       const item = list.find(r => r.id === id);
       if (!item) return null;
-      const dup = { ...item, id: `slice_pay_${Date.now()}` };
+      const dup = { ...item, id: undefined, month: new Date().toISOString().slice(0, 7) };
       return mockStore.mockSaveSlicePayment(dup);
     }
   );
 };
-
-// Analytics & Reports
-export const fetchAnalyticsApi = async () => {
-  return safeCall(
-    () => API.get('/analytics'),
-    () => mockStore.mockGetAnalytics()
-  );
-};
-
-export const fetchReportsApi = async (params) => {
-  return safeCall(
-    () => API.get('/reports', { params }),
-    () => {
-      const icici = mockStore.mockGetICICIPayments();
-      const slice = mockStore.mockGetSlicePayments();
-      return { icici, slice };
-    }
-  );
-};
-
-// Settings & Audit
-export const fetchSettingsApi = async () => {
-  return safeCall(
-    () => API.get('/settings'),
-    () => mockStore.mockGetSettings()
-  );
-};
-
-export const updateSettingsApi = async (data) => {
-  return safeCall(
-    () => API.put('/settings', data),
-    () => data
-  );
-};
-
-export const resetDemoDataApi = async () => {
-  return safeCall(
-    () => API.post('/settings/reset-demo'),
-    () => mockStore.mockResetDemo()
-  );
-};
-
-export const clearAllDataApi = async () => {
-  return safeCall(
-    () => API.post('/settings/clear-all'),
-    () => {
-      localStorage.removeItem('paytrack_icici');
-      localStorage.removeItem('paytrack_slice');
-      return { success: true };
-    }
-  );
-};
-
-export const fetchAuditLogsApi = async () => {
-  return safeCall(
-    () => API.get('/audit'),
-    () => [
-      {
-        id: 'log_001',
-        action: 'SYSTEM_INIT',
-        details: 'PayTrack workspace active with demo records.',
-        timestamp: new Date().toISOString()
-      }
-    ]
-  );
-};
-
-export default API;
